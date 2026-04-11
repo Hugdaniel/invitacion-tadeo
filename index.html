@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+
+  <!--
+    viewport: le dice al celular que use su ancho real.
+    Sin esto, mobile muestra la página como si fuera desktop chiquito.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>¡Tadeo cumple 1 año!</title>
+
+  <!--
+    Google Fonts — se cargan antes del CSS para que estén
+    disponibles cuando el navegador dibuja la página.
+    Luckiest Guy → títulos caricaturescos
+    Nunito       → textos del cuerpo, redondeada y legible
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@400;700;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <!--
+    El CSS va en el <head> para que se cargue antes de mostrar
+    cualquier contenido. Evita el "flash" de página sin estilos.
+  -->
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+
+  <!-- ========================================================
+    INTRO
+    Cubre toda la pantalla al inicio.
+    JS la esconde cuando el video termina.
+  ======================================================== -->
+  <div id="intro">
+    <video id="video-intro" autoplay muted playsinline>
+      <!--
+        autoplay  → arranca solo al cargar la página
+        muted     → obligatorio para que autoplay funcione en mobile
+        playsinline → en iOS no abre pantalla completa
+      -->
+      <source src="assets/intro-video.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+
+  <!-- ========================================================
+    PANTALLA DE BIENVENIDA
+    Aparece después del intro, antes de la invitación.
+    Muestra un lemming animado + botón para entrar.
+    JS la controla: aparece cuando termina el video,
+    desaparece cuando el usuario toca el botón.
+  ======================================================== -->
+  <div id="bienvenida">
+
+    <!--
+      El lemming que aparece primero, saltando desde abajo.
+      También es interactivo — al tocarlo dice "tabodi".
+      data-audio apunta al audio del tabodi.
+    -->
+    <img
+      id="lemming-bienvenida"
+      src="assets/tabodi-1.png"
+      alt="Lemming"
+      data-audio="assets/tabodi.mp3"
+      class="lemming-interactivo"
+    />
+
+    <!--
+      El botón aparece después del lemming con un pequeño delay.
+      La animación de entrada está definida en el CSS.
+    -->
+    <button id="btn-entrar" class="btn-madera btn-entrar" onclick="entrarInvitacion()">
+      ¡Ver la invitación!
+    </button>
+
+  </div>
+
+
+  <!-- ========================================================
+    INVITACIÓN PRINCIPAL
+    Empieza invisible (opacity: 0 en el CSS).
+    JS le agrega la clase .visible cuando el usuario
+    toca el botón de bienvenida.
+  ======================================================== -->
+  <div id="invitacion">
+
+    <!-- ── HERO ───────────────────────────────────────────
+      Primera sección. Fondo parallax con la imagen de la serie.
+      El cartel "Mi primer añito" flota con animación CSS.
+    ─────────────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-content">
+        <!-- <h1>¡Tadeo<br>cumple 1!</h1> -->
+        <!-- <h2>Te invitamos a festejarlo con nosotros</h2> -->
+
+        <div class="cartel">
+          <!--
+            Reemplazá el src con el nombre de tu cartel.
+            alt es obligatorio por accesibilidad.
+          -->
+          <img src="assets/cartel.png" alt="Mi primer añito" />
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ── SECCIÓN DATOS ──────────────────────────────────
+      Tres lemmings con sus botones: fecha, hora, ubicación.
+      Los lemmings reproducen audio al tocarlos.
+      Esta sección se completa en el próximo paso.
+    ─────────────────────────────────────────────────────── -->
+    <section class="seccion seccion-datos">
+      <h2 class="seccion-titulo">¿Cuándo y dónde?</h2>
+
+      <div class="datos-grid">
+
+        <!-- Lemming 1 → Fecha -->
+        <div class="dato-item">
+          <img
+            class="lemming-interactivo"
+            src="assets/img/lemming-fecha.png"
+            alt="Lemming fecha"
+            data-audio="assets/audio/tabodi-1.mp3"
+          />
+          <button class="btn-madera">
+            Sábado 14 de Junio
+          </button>
+        </div>
+
+        <!-- Lemming 2 → Hora -->
+        <div class="dato-item">
+          <img
+            class="lemming-interactivo"
+            src="assets/img/lemming-hora.png"
+            alt="Lemming hora"
+            data-audio="assets/audio/tabodi-2.mp3"
+          />
+          <button class="btn-madera">
+            17:00 hs
+          </button>
+        </div>
+
+        <!-- Lemming 3 → Ubicación -->
+        <div class="dato-item">
+          <img
+            class="lemming-interactivo"
+            src="assets/img/lemming-ubicacion.png"
+            alt="Lemming ubicación"
+            data-audio="assets/audio/risa-lemmings.mp3"
+          />
+          <!--
+            onclick abre Google Maps con la dirección.
+            Reemplazá la URL con la dirección real del evento.
+          -->
+          <button
+            class="btn-madera"
+            onclick="abrirMaps()"
+          >
+            Ver ubicación
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ── SECCIÓN BEBÉ + RSVP ────────────────────────────
+      Caricatura del bebé que al tocarla suena su risa.
+      Botón que abre el modal de confirmación.
+    ─────────────────────────────────────────────────────── -->
+    <section class="seccion seccion-rsvp">
+      <h2 class="seccion-titulo">¿Venís?</h2>
+
+      <!--
+        La caricatura del bebé.
+        data-audio apunta a la risa grabada.
+        JS detecta el click y reproduce el audio.
+      -->
+      <div class="bebe-container">
+        <img
+          id="caricatura-bebe"
+          class="lemming-interactivo"
+          src="assets/img/caricatura-bebe.png"
+          alt="Tadeo"
+          data-audio="assets/audio/risa-bebe.mp3"
+        />
+        <p class="bebe-texto">¡Tocame!</p>
+      </div>
+
+      <button class="btn-madera btn-rsvp" onclick="abrirRSVP()">
+        ¡Confirmá tu lugar!
+      </button>
+    </section>
+
+
+    <!-- ── MODAL RSVP ─────────────────────────────────────
+      Empieza oculto (display: none en CSS).
+      JS lo muestra cuando se toca el botón de arriba.
+      El formulario envía a Google Sheets igual que en Minecraft.
+    ─────────────────────────────────────────────────────── -->
+    <div id="modal-rsvp" class="modal-overlay" onclick="cerrarRSVP(event)">
+      <div class="modal-contenido">
+
+        <button class="modal-cerrar" onclick="cerrarRSVP()">&times;</button>
+
+        <h3 class="modal-titulo">¡Confirmá tu asistencia!</h3>
+
+        <form id="form-rsvp" onsubmit="enviarRSVP(event)">
+
+          <div class="campo">
+            <label for="nombre">Tu nombre</label>
+            <input type="text" id="nombre" placeholder="¿Cómo te llamás?" required />
+          </div>
+
+          <div class="campo">
+            <label for="personas">¿Cuántos vienen?</label>
+            <input type="number" id="personas" min="1" max="10" value="1" required />
+          </div>
+
+          <div class="campo">
+            <label for="mensaje">Mensaje para Tadeo (opcional)</label>
+            <textarea id="mensaje" placeholder="Un deseo para el cumpleañero..." rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="btn-madera btn-confirmar">
+            ¡Vamos a la fiesta!
+          </button>
+
+        </form>
+
+        <!-- Mensaje de éxito, oculto hasta que se envía el form -->
+        <div id="rsvp-exito" class="rsvp-exito" style="display:none;">
+          <p>🐻 ¡Nos vemos en la fiesta!</p>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ── FOOTER ANIMADO ─────────────────────────────────
+      La animación del oso y los lemmings que tenés.
+      Debajo el logo y CTA de Vision Design.
+    ─────────────────────────────────────────────────────── -->
+    <footer>
+      <!--
+        La animación del oso + lemmings.
+        Se puede usar como <img> si es un GIF o WebP animado,
+        o como <video> si es un MP4.
+      -->
+      <div class="footer-animacion">
+        <img
+          src="assets/img/animacion-oso-lemmings.gif"
+          alt="Grizzy y los lemmings"
+        />
+      </div>
+
+      <div class="footer-visiondesign">
+        <img
+          src="assets/img/vision-design-logo.png"
+          alt="Vision Design"
+          class="footer-logo"
+        />
+        <p>Invitación digital creada por</p>
+        <a
+          href="https://instagram.com/visiondesign_ok"
+          target="_blank"
+          rel="noopener"
+        >
+          @visiondesign_ok
+        </a>
+        <p class="footer-cta">¿Querés una invitación como esta? ¡Escribinos!</p>
+      </div>
+    </footer>
+
+  </div><!-- fin #invitacion -->
+
+
+  <!--
+    El JS va al final del body — cuando llega acá,
+    todos los elementos HTML ya existen en el DOM
+    y JS puede encontrarlos sin problemas.
+  -->
+  <script src="main.js"></script>
+
+</body>
+</html>
