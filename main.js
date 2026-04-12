@@ -1,201 +1,251 @@
 /*
 ================================================================
-MAIN.JS — Invitación Grizzy & The Lemmings
+MAIN.JS — Invitación Grizzy & The Lemmings — v2
 ================================================================
 Organización:
   1. Referencias al DOM
-  2. Lógica del intro
-  3. Audio — lemmings interactivos
-  4. Parallax del hero
-  5. Modal RSVP
-  6. Envío del formulario a Google Sheets
-  7. Utilidades
+  2. Intro — capa logo → capa personajes → invitación
+  3. Audio — todos los elementos interactivos
+  4. Parallax del hero (compatible iOS)
+  5. IntersectionObserver — animación final
+  6. Modal RSVP
+  7. Envío del formulario a Google Sheets
+  8. Utilidades
 ================================================================
 */
 
 
-/* ── 1. REFERENCIAS AL DOM ────────────────────────────────────
-   Guardamos los elementos que vamos a usar en variables.
-   Es más eficiente que buscarlo con getElementById cada vez.
-──────────────────────────────────────────────────────────────── */
-const videoIntro        = document.getElementById('video-intro')
-const pantallaIntro     = document.getElementById('intro')
-const pantallaBienvenida = document.getElementById('bienvenida')
-const lemmingBienvenida  = document.getElementById('lemming-bienvenida')
-const btnEntrar          = document.getElementById('btn-entrar')
+/* ── 1. REFERENCIAS AL DOM ─────────────────────────────────────
+   Variables para cada elemento que JS necesita manipular.
+   Guardarlo en variables es más eficiente que buscarlo cada vez.
+─────────────────────────────────────────────────────────────── */
+const introLogo         = document.getElementById('intro-logo')
+const introPersonajes   = document.getElementById('intro-personajes')
+const videoLogo         = document.getElementById('video-logo')
+const btnEntrar         = document.getElementById('btn-entrar')
 const invitacion        = document.getElementById('invitacion')
 const modalRSVP         = document.getElementById('modal-rsvp')
 const formRSVP          = document.getElementById('form-rsvp')
 const rsvpExito         = document.getElementById('rsvp-exito')
+const hero              = document.querySelector('.hero')
+const animacionFinal    = document.getElementById('animacion-final')
+const videoPersonajes = document.querySelector('.personajes-animacion video')
 
 /*
-  querySelectorAll devuelve TODOS los elementos con esa clase.
-  Los lemmings y la caricatura del bebé comparten la misma lógica de audio.
+  Todos los elementos con .lemming-interactivo comparten
+  la misma lógica de audio y animación de salto.
+  Incluye: lemmings de costado, lemmings de datos y caricatura del bebé.
 */
 const elementosInteractivos = document.querySelectorAll('.lemming-interactivo')
 
 
-/* ── 2. LÓGICA DEL INTRO ──────────────────────────────────────
-   Cuando el video termina → fade out intro → aparece bienvenida.
-   Cuando el usuario toca el botón → fade out bienvenida → invitación.
-──────────────────────────────────────────────────────────────── */
+/* ── 2. INTRO — TRANSICIÓN EN DOS CAPAS ───────────────────────
 
-videoIntro.addEventListener('ended', mostrarBienvenida)
-videoIntro.addEventListener('error', mostrarBienvenida)
+  FLUJO COMPLETO:
+  ┌─────────────────────────────────────────────────────┐
+  │ Video logo termina                                  │
+  │   → fade out capa logo                              │
+  │   → fade in capa personajes                         │
+  │   → lemming aparece (ya está en la animación)       │
+  │   → botón hace pop con rebote                       │
+  │   → botón empieza a brillar                         │
+  │                                                     │
+  │ Usuario toca "Ver la invitación"                    │
+  │   → fade out intro completo                         │
+  │   → fade in invitación                              │
+  │   → audio desbloqueado en iOS ✓                    │
+  └─────────────────────────────────────────────────────┘
+─────────────────────────────────────────────────────────────── */
+
+/* El video del logo dispara la transición al terminar */
+videoLogo.addEventListener('ended', mostrarPersonajes)
+
+/* Fallback: si el video falla, igual avanzamos */
+videoLogo.addEventListener('error', mostrarPersonajes)
 
 /*
-  Fallback: si después de 10 segundos el video no terminó,
-  igual avanzamos. Útil para conexiones lentas.
+  Fallback de tiempo: si a los 10 segundos el video
+  no terminó (conexión lenta), avanzamos igual.
 */
-const timeoutIntro = setTimeout(mostrarBienvenida, 10000)
+const timeoutLogo = setTimeout(mostrarPersonajes, 10000)
 
-function mostrarBienvenida() {
-  clearTimeout(timeoutIntro)
+function mostrarPersonajes() {
+  /*
+    clearTimeout evita que se ejecute dos veces
+    si el video terminó normalmente antes del timeout.
+  */
+  clearTimeout(timeoutLogo)
 
-  /* 1. Fade out del intro */
-  pantallaIntro.classList.add('fade-out')
+  /* 1. Fade out de la capa del logo */
+  introLogo.classList.add('fade-out')
 
   setTimeout(() => {
-    /* 2. Ocultamos el intro del DOM */
-    pantallaIntro.style.display = 'none'
+    /* 2. Ocultamos la capa del logo del flujo visual */
+    introLogo.style.display = 'none'
 
     /*
-      3. Mostramos la pantalla de bienvenida.
-      Primero la hacemos display:flex (necesario para que sea visible),
-      luego en el siguiente frame del navegador agregamos .activa
-      para que la transición de opacity funcione correctamente.
-      Si agregáramos display y opacity juntos, el navegador no
-      animaría porque el elemento recién aparece en ese frame.
+      3. Mostramos la capa de personajes.
+      Primero display:flex, luego en el siguiente frame
+      agregamos .visible para que la transición de opacity funcione.
+      Si cambiamos display y opacity juntos en el mismo frame,
+      el navegador no anima porque el elemento recién aparece.
     */
-    pantallaBienvenida.style.display = 'flex'
+    introPersonajes.classList.add('activo')
 
+    /*
+      doble requestAnimationFrame: técnica estándar para animar
+      elementos que pasan de display:none a display:flex.
+      El primer frame confirma que display:flex se aplicó,
+      el segundo dispara la transición de opacity.
+    */
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        /*
-          Doble requestAnimationFrame: el primero confirma que
-          display:flex ya se aplicó, el segundo dispara la animación.
-          Es un patrón conocido para animar elementos que pasan
-          de display:none a display:flex.
-        */
-        pantallaBienvenida.style.opacity = '1'
+  requestAnimationFrame(() => {
+    introPersonajes.classList.add('visible')
+    videoPersonajes.addEventListener('timeupdate', () => {
+  /*
+    timeupdate se dispara continuamente mientras el video avanza.
+    duration → duración total del video en segundos.
+    currentTime → segundo actual del video.
+    Cuando quedan 1.5s (mismo tiempo que el transition CSS),
+    arrancamos el fade out.
+  */
+  const tiempoRestante = videoPersonajes.duration - videoPersonajes.currentTime
 
-        /* 4. Animamos el lemming después de un pequeño delay */
-        setTimeout(() => {
-          lemmingBienvenida.classList.add('animar')
-        }, 100)
+  if (tiempoRestante <= 1.5) {
+    videoPersonajes.classList.add('desvaneciendo')
+  }
+})
 
-        /*
-          5. Animamos el botón después de que el lemming llegó.
-          El CSS ya tiene animation-delay: 0.4s en .btn-entrar.animar,
-          pero lo disparamos con un pequeño delay extra para asegurarnos.
-        */
-        setTimeout(() => {
-          btnEntrar.classList.add('animar')
+    setTimeout(() => {                    // ← abre setTimeout OVERLAY (espera 600ms)
 
-          /*
-            6. Después de que termina el pop del botón,
-            activamos el brillo pulsante continuo.
-            0.4s (delay CSS) + 0.5s (duración pop) = 0.9s
-          */
-          setTimeout(() => {
-            btnEntrar.classList.remove('animar')
-            btnEntrar.classList.add('brillar')
-            btnEntrar.style.opacity = '1' /* garantizamos que sea visible */
-          }, 900)
+      document.getElementById('personajes-overlay').classList.add('oscurecer')
 
-        }, 200)
+      setTimeout(() => {                  // ← abre setTimeout BOTÓN (espera 1000ms más)
 
-      })
-    })
+        btnEntrar.classList.add('animar')
 
-  }, 800) /* mismo tiempo que el fade del intro */
+        setTimeout(() => {                // ← abre setTimeout BRILLO (espera 800ms más)
+          btnEntrar.classList.remove('animar')
+          btnEntrar.classList.add('brillar')
+        }, 800)                           // ← cierra setTimeout BRILLO
+
+      }, 1000)                            // ← cierra setTimeout BOTÓN
+
+    }, 600)                               // ← cierra setTimeout OVERLAY
+
+  })                                      // ← cierra segundo requestAnimationFrame
+})                                        // ← cierra primer requestAnimationFrame
+
+  }, 800) /* mismo tiempo que el fade del logo */
 }
 
+
 /*
-  Función llamada desde el botón en el HTML: onclick="entrarInvitacion()"
-  Este tap también "desbloquea" el audio en iOS —
-  a partir de acá todos los audios se pueden reproducir sin restricciones.
+  Llamada desde el botón en el HTML: onclick="entrarInvitacion()"
+
+  Este tap es CLAVE para iOS:
+  → el primer tap del usuario desbloquea el motor de audio del navegador.
+  → a partir de acá todos los Audio.play() funcionan sin restricciones.
 */
 function entrarInvitacion() {
 
-  /* 1. Fade out de la bienvenida */
-  pantallaBienvenida.style.opacity = '0'
-  pantallaBienvenida.style.transition = 'opacity 0.8s ease'
-  pantallaBienvenida.style.pointerEvents = 'none'
+  /* 1. Fade out del intro completo (capa de personajes) */
+  introPersonajes.classList.add('fade-out')
 
   setTimeout(() => {
-    /* 2. Ocultamos la bienvenida */
-    pantallaBienvenida.style.display = 'none'
+
+    /* 2. Ocultamos el intro completo */
+    document.getElementById('intro').style.display = 'none'
 
     /* 3. Fade in de la invitación */
     invitacion.classList.add('visible')
+
+    /*
+      4. Iniciamos el parallax ahora que la invitación es visible.
+      Si lo iniciáramos antes, los cálculos de posición serían incorrectos
+      porque el elemento no ocupaba espacio en pantalla.
+    */
+    iniciarParallax()
 
   }, 800)
 }
 
 
-/* ── 3. AUDIO — ELEMENTOS INTERACTIVOS ───────────────────────
-   Cada lemming y la caricatura del bebé tienen un
-   atributo data-audio con la ruta al archivo de audio.
+/* ── 3. AUDIO — ELEMENTOS INTERACTIVOS ─────────────────────────
+   Cada elemento con .lemming-interactivo tiene data-audio
+   con la ruta al archivo mp3.
    Al tocarlo: reproduce el audio + animación de salto.
-──────────────────────────────────────────────────────────────── */
+─────────────────────────────────────────────────────────────── */
 
-/*
-  Recorremos todos los elementos interactivos
-  y le asignamos el mismo handler de click a cada uno.
-*/
 elementosInteractivos.forEach(elemento => {
   elemento.addEventListener('click', () => {
 
-    /* Leemos la ruta del audio desde el atributo data-audio del HTML */
-    const rutaAudio = elemento.dataset.audio
+    /* Lee la ruta del audio del atributo data-audio en el HTML */
+    const ruta = elemento.dataset.audio
+    if (ruta) reproducirAudio(ruta)
 
-    if (rutaAudio) {
-      reproducirAudio(rutaAudio)
+    /*
+      Determina si es el lemming derecho (espejado).
+      Necesitamos una animación diferente porque tiene scaleX(-1).
+    */
+    const esDerecho = elemento.classList.contains('lemming-der')
+
+    /*
+      Agrega la clase de salto correcta.
+      { once: true } → el listener se elimina solo después de ejecutarse,
+      evitando acumulación de listeners en cada click.
+    */
+    if (esDerecho) {
+      elemento.classList.add('saltando') /* CSS tiene keyframe especial para .lemming-der.saltando */
+    } else {
+      elemento.classList.add('saltando')
     }
 
-    /* Animación de salto: agrega la clase, espera que termine, la saca */
-    elemento.classList.add('saltando')
     elemento.addEventListener('animationend', () => {
       elemento.classList.remove('saltando')
-    }, { once: true }) /* once: true → el listener se elimina solo después de ejecutarse */
+    }, { once: true })
 
   })
 })
 
 /*
   Función reutilizable para reproducir audio.
-  Crea un nuevo objeto Audio cada vez para permitir
-  que el mismo sonido se superponga si se toca rápido.
+  Crea un new Audio() cada vez → permite que el mismo
+  sonido se superponga si se toca rápido (varios lemmings).
 */
 function reproducirAudio(ruta) {
   const audio = new Audio(ruta)
-  /*
-    Los navegadores bloquean el audio no iniciado por el usuario.
-    Como esta función siempre se llama desde un click,
-    está garantizado que el usuario interactuó primero.
-  */
   audio.play().catch(err => {
-    /* Si igual falla, lo ignoramos silenciosamente */
-    console.warn('Audio no pudo reproducirse:', err)
+    /*
+      Si el audio falla, lo ignoramos silenciosamente.
+      No queremos que un error de audio rompa la experiencia.
+    */
+    console.warn('Audio no reproducido:', err)
   })
 }
 
 
-/* ── 4. PARALLAX DEL HERO ─────────────────────────────────────
-   background-attachment: fixed no funciona bien en iOS.
-   Esta versión JS funciona en todos los dispositivos.
-──────────────────────────────────────────────────────────────── */
-const hero = document.querySelector('.hero')
+/* ── 4. PARALLAX DEL HERO ──────────────────────────────────────
+   background-attachment:fixed no funciona en iOS Safari.
+   Este parallax JS funciona en todos los dispositivos.
+   Se inicia recién cuando la invitación es visible.
+─────────────────────────────────────────────────────────────── */
+let parallaxActivo = false
+
+function iniciarParallax() {
+  parallaxActivo = true
+}
 
 /*
   requestAnimationFrame → llama a la función en cada fotograma
-  del navegador (60 veces por segundo).
-  Es más suave y eficiente que usar scroll directamente.
+  del navegador (~60 veces por segundo).
+  tickParallax evita cálculos duplicados en el mismo frame.
 */
 let tickParallax = false
 
 window.addEventListener('scroll', () => {
+  if (!parallaxActivo) return
+
   if (!tickParallax) {
     requestAnimationFrame(() => {
       aplicarParallax()
@@ -207,39 +257,68 @@ window.addEventListener('scroll', () => {
 
 function aplicarParallax() {
   if (!hero) return
-
   /*
-    window.scrollY → cuántos pixels bajó el scroll.
-    Multiplicamos por 0.4 → el fondo se mueve al 40% de velocidad
-    del scroll, creando el efecto de profundidad.
-    Cuanto más chico el número, más lento se mueve el fondo.
+    window.scrollY → pixels que bajó el scroll.
+    × 0.35 → el fondo se mueve al 35% de velocidad del scroll.
+    Cuanto más chico el número, más lento y más profundo el efecto.
   */
-  const offset = window.scrollY * 0.4
-  hero.style.backgroundPositionY = `calc(center + ${offset}px)`
+  const offset = window.scrollY * 0.35
+  hero.style.backgroundPositionY = `calc(top + ${offset}px)`
 }
 
 
-/* ── 5. MODAL RSVP ────────────────────────────────────────────
-   Abre y cierra la ventana de confirmación.
-──────────────────────────────────────────────────────────────── */
+/* ── 5. INTERSECTIONOBSERVER — ANIMACIÓN FINAL ─────────────────
+   Detecta cuando el usuario llega a la sección final
+   y dispara la animación de entrada del oso + lemmings.
+─────────────────────────────────────────────────────────────── */
 
-/* Llamada desde el botón en el HTML: onclick="abrirRSVP()" */
+/*
+  IntersectionObserver llama al callback cuando el elemento
+  entra o sale del viewport (la pantalla visible).
+  threshold: 0.3 → se dispara cuando el 30% del elemento es visible.
+*/
+const observadorFinal = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      /*
+        Agrega .visible → CSS hace el fade in + slide up.
+        once: después de agregar .visible no necesitamos
+        seguir observando, así que desconectamos.
+      */
+      animacionFinal.classList.add('visible')
+      observadorFinal.disconnect()
+    }
+  })
+}, { threshold: 0.3 })
+
+/* Empezamos a observar solo si el elemento existe en el DOM */
+if (animacionFinal) {
+  observadorFinal.observe(animacionFinal)
+}
+
+
+/* ── 6. MODAL RSVP ─────────────────────────────────────────────
+   Abre y cierra la ventana de confirmación de asistencia.
+─────────────────────────────────────────────────────────────── */
+
+/* Llamada desde onclick="abrirRSVP()" en el HTML */
 function abrirRSVP() {
   modalRSVP.classList.add('activo')
   /*
-    Bloqueamos el scroll del body mientras el modal está abierto.
-    Si no, el usuario puede scrollear la página de fondo.
+    Bloquea el scroll del body mientras el modal está abierto.
+    Sin esto, el usuario puede scrollear la página de fondo.
   */
   document.body.style.overflow = 'hidden'
 }
 
-/* Llamada desde el botón X y desde el onclick del overlay */
+/* Llamada desde el botón X y desde onclick del overlay */
 function cerrarRSVP(event) {
   /*
-    Si se llama desde el click en el overlay, verificamos
-    que el click fue en el overlay mismo y no en el modal interior.
-    event.target es el elemento donde se hizo click.
-    event.currentTarget es el elemento que tiene el handler (el overlay).
+    Si viene de un click en el overlay, verificamos que el click
+    fue en el overlay mismo y no en el modal interior.
+    event.target     → donde se hizo el click.
+    event.currentTarget → el elemento que tiene el handler.
+    Si son distintos, el click fue en el modal (hijo) → no cerramos.
   */
   if (event && event.target !== event.currentTarget) return
 
@@ -247,90 +326,72 @@ function cerrarRSVP(event) {
   document.body.style.overflow = '' /* restaura el scroll */
 }
 
-/* También cerramos el modal con la tecla Escape */
-document.addEventListener('keydown', (e) => {
+/* Cerrar con la tecla Escape */
+document.addEventListener('keydown', e => {
   if (e.key === 'Escape') cerrarRSVP()
 })
 
 
-/* ── 6. ENVÍO DEL FORMULARIO ──────────────────────────────────
-   Envía los datos a Google Sheets igual que en el proyecto Minecraft.
-   fetch con no-cors → no necesita backend, va directo a Google Forms.
-──────────────────────────────────────────────────────────────── */
+/* ── 7. ENVÍO A GOOGLE SHEETS ──────────────────────────────────
+   Misma técnica que en el proyecto Minecraft.
+   fetch con mode:'no-cors' → no necesita backend propio.
+─────────────────────────────────────────────────────────────── */
 
 /*
-  IMPORTANTE: reemplazá esta URL con la de tu Google Form.
-  Para obtenerla: abrí el Form → pre-compilar respuestas → copiar link.
-  Cambiá /viewform por /formResponse al final.
+  ⚠️  IMPORTANTE: reemplazá esta URL con la de tu Google Form.
+  Pasos:
+    1. Creá el formulario en Google Forms con 3 campos.
+    2. Hacé clic en "Vista previa" (ojo).
+    3. Inspeccioná cada campo → buscá name="entry.XXXXXXX".
+    4. Copiá esos valores abajo.
+    5. Tomá la URL del form y cambiá /viewform por /formResponse.
 */
-const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/TU_FORM_ID/formResponse'
+const FORM_URL = 'https://docs.google.com/forms/d/e/TU_FORM_ID_ACA/formResponse'
 
-/*
-  También reemplazá estos con los entry.XXXXXXX de tu formulario.
-  Para encontrarlos: botón derecho en el campo del form → inspeccionar.
-*/
-const CAMPOS_FORM = {
+const ENTRIES = {
   nombre:   'entry.XXXXXXXXX',
   personas: 'entry.XXXXXXXXX',
   mensaje:  'entry.XXXXXXXXX'
 }
 
-formRSVP.addEventListener('submit', async (e) => {
+formRSVP.addEventListener('submit', async e => {
   /*
-    preventDefault evita que el formulario recargue la página,
-    que es el comportamiento por defecto de un <form>.
+    preventDefault → evita que el form recargue la página,
+    que es el comportamiento por defecto de HTML.
   */
   e.preventDefault()
 
-  /* Leemos los valores de los campos */
-  const nombre   = document.getElementById('nombre').value
-  const personas = document.getElementById('personas').value
-  const mensaje  = document.getElementById('mensaje').value
-
-  /* Armamos los datos en formato URLSearchParams (lo que Google espera) */
   const datos = new URLSearchParams()
-  datos.append(CAMPOS_FORM.nombre,   nombre)
-  datos.append(CAMPOS_FORM.personas, personas)
-  datos.append(CAMPOS_FORM.mensaje,  mensaje)
+  datos.append(ENTRIES.nombre,   document.getElementById('nombre').value)
+  datos.append(ENTRIES.personas, document.getElementById('personas').value)
+  datos.append(ENTRIES.mensaje,  document.getElementById('mensaje').value)
 
   try {
-    /*
-      mode: 'no-cors' → evita errores de CORS al enviar a Google.
-      La desventaja es que no podemos leer la respuesta,
-      pero para un form simple alcanza y sobra.
-    */
-    await fetch(GOOGLE_FORM_URL, {
+    await fetch(FORM_URL, {
       method: 'POST',
-      mode:   'no-cors',
+      mode:   'no-cors', /* evita errores CORS con Google */
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body:   datos.toString()
     })
-
-    /* Si llegamos acá, asumimos que el envío fue exitoso */
-    mostrarExitoRSVP()
-
-  } catch (error) {
-    /*
-      Con no-cors los errores de red igual llegan acá.
-      Mostramos el éxito igual porque Google suele recibirlo.
-    */
-    console.error('Error al enviar:', error)
-    mostrarExitoRSVP()
+  } catch (err) {
+    /* Con no-cors los errores llegan acá igualmente */
+    console.error('Error al enviar RSVP:', err)
   }
+
+  /* Mostramos el éxito independientemente del resultado */
+  mostrarExitoRSVP()
 })
 
 function mostrarExitoRSVP() {
-  /* Ocultamos el form y mostramos el mensaje de éxito */
   formRSVP.style.display = 'none'
   rsvpExito.style.display = 'block'
 
-  /* Reproducimos la risa del bebé como confirmación */
+  /* La risa del bebé como confirmación */
   reproducirAudio('assets/audio/risa-bebe.mp3')
 
-  /* Después de 3 segundos cerramos el modal automáticamente */
+  /* Cerramos el modal a los 3 segundos y reseteamos */
   setTimeout(() => {
     cerrarRSVP()
-    /* Reseteamos el modal para si lo vuelve a abrir */
     setTimeout(() => {
       formRSVP.style.display = 'block'
       rsvpExito.style.display = 'none'
@@ -340,13 +401,13 @@ function mostrarExitoRSVP() {
 }
 
 
-/* ── 7. UTILIDADES ────────────────────────────────────────────
-   Funciones de uso general.
-──────────────────────────────────────────────────────────────── */
+/* ── 8. UTILIDADES ─────────────────────────────────────────────
+   Funciones de uso general expuestas globalmente
+   para que el HTML pueda llamarlas con onclick="...".
+─────────────────────────────────────────────────────────────── */
 
 /*
   Abre Google Maps con la dirección del evento.
-  Llamada desde el botón de ubicación en el HTML.
   Reemplazá la dirección con la real.
 */
 function abrirMaps() {

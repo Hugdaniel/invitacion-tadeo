@@ -1,27 +1,33 @@
 /*
 ================================================================
-STYLES.CSS — Invitación Grizzy & The Lemmings
+STYLES.CSS — Invitación Grizzy & The Lemmings — v2
 ================================================================
 Organización:
-  1. Variables globales
-  2. Reset y base
-  3. Intro
-  4. Invitación principal
-  5. Hero
-  6. Sección datos
-  7. Sección RSVP / bebé
-  8. Modal RSVP
-  9. Footer
-  10. Animaciones
-  11. Responsive mobile
+  1.  Variables globales
+  2.  Reset y base
+  3.  Intro — capa logo
+  4.  Intro — capa personajes + botón
+  5.  Invitación principal
+  6.  Hero — fondo parallax
+  7.  Cartel flotante
+  8.  Tarjetas sticky
+  9.  Lemmings de tarjeta (costados)
+  10. Datos dentro de tarjeta
+  11. Bebé + RSVP dentro de tarjeta
+  12. Botones
+  13. Modal RSVP
+  14. Sección final + animación
+  15. Footer
+  16. Animaciones @keyframes
+  17. Responsive mobile
 ================================================================
 */
 
 
-/* ── 1. VARIABLES GLOBALES ────────────────────────────────────
-   Todos los colores y fuentes en un solo lugar.
+/* ── 1. VARIABLES GLOBALES ─────────────────────────────────────
+   Un solo lugar para todos los colores y tipografías.
    Cambiás una variable → se actualiza en todo el archivo.
-──────────────────────────────────────────────────────────────── */
+─────────────────────────────────────────────────────────────── */
 :root {
   --marron:       #8B4513;
   --marron-osc:   #5C2D0A;
@@ -37,33 +43,29 @@ Organización:
   --font-titulo: 'Luckiest Guy', cursive;
   --font-cuerpo: 'Nunito', sans-serif;
 
-  /* duración del fade entre intro e invitación */
-  --fade-duracion: 0.8s;
+  --fade: 0.8s;         /* duración estándar de todos los fades */
+  --radio-tarjeta: 24px; /* borde redondeado de las tarjetas */
 }
 
 
-/* ── 2. RESET Y BASE ──────────────────────────────────────────
-   Elimina estilos por defecto del navegador para tener
-   control total sobre cada elemento.
-──────────────────────────────────────────────────────────────── */
+/* ── 2. RESET Y BASE ───────────────────────────────────────────
+   Elimina estilos por defecto del navegador.
+─────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* padding no agranda el elemento */
+  box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth; /* scroll suave al navegar entre secciones */
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-cuerpo);
-  /* background: var(--cielo); */
+  background: #000; /* negro base, el fondo de la serie lo tapa */
   color: var(--negro);
-  overflow-x: hidden; /* evita scroll horizontal accidental */
-  background-image: url('assets/fondo.png');
-  background-size: cover;
-  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
 img {
@@ -78,155 +80,145 @@ button {
 }
 
 
-/* ── 3. INTRO ─────────────────────────────────────────────────
-   Pantalla negra que cubre todo mientras se reproduce el video.
-──────────────────────────────────────────────────────────────── */
-
-/*
-  position: fixed  → pegada a la pantalla, no se mueve con el scroll
-  inset: 0         → ocupa todo (top/right/bottom/left = 0)
-  z-index: 9999    → por encima de absolutamente todo
-*/
+/* ── 3. INTRO — CAPA LOGO ──────────────────────────────────────
+   Primera pantalla. Video del logo Vision Design.
+   Cubre todo con fondo negro, z-index máximo.
+─────────────────────────────────────────────────────────────── */
 #intro {
   position: fixed;
   inset: 0;
+  z-index: 9999;
   background: #000;
+}
+
+/*
+  La capa del logo ocupa todo el intro.
+  display:flex centra el video.
+*/
+#intro-logo {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
   opacity: 1;
-  transition: opacity var(--fade-duracion) ease;
+  transition: opacity var(--fade) ease;
 }
 
-/*
-  Cuando JS agrega esta clase, la transición de arriba
-  hace que opacity baje suavemente de 1 a 0.
-*/
-#intro.fade-out {
+#intro-logo.fade-out {
   opacity: 0;
-  pointer-events: none; /* no responde a clicks mientras desaparece */
+  pointer-events: none;
 }
 
-/*
-  object-fit: contain → el video entra completo sin recortarse,
-  respetando sus proporciones.
-*/
-#video-intro {
+#video-logo {
   max-width: 90%;
   max-height: 90vh;
   object-fit: contain;
 }
 
 
-/* ── 4. PANTALLA DE BIENVENIDA ────────────────────────────────
-   Aparece después del intro. Fondo negro como el intro
-   para que la transición sea continua y no haya salto visual.
-   Empieza oculta — JS la muestra cuando termina el video.
-──────────────────────────────────────────────────────────────── */
-#bienvenida {
-  /*
-    Misma base que el intro: cubre toda la pantalla.
-    display: none → oculta hasta que JS la activa.
-  */
-  position: fixed;
+/* ── 4. INTRO — CAPA PERSONAJES + BOTÓN ───────────────────────
+   Segunda pantalla del intro.
+   Muestra la animación de Grizzy + Lemmings + Tadeo
+   y el botón para entrar a la invitación.
+─────────────────────────────────────────────────────────────── */
+#intro-personajes {
+ position: absolute;
   inset: 0;
-  background: #000;
   display: none;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  z-index: 9998; /* un nivel debajo del intro */
+  align-items: flex-end; /* botón abajo */
+  justify-content: flex-end;
+  padding: 2rem;
   opacity: 0;
-  transition: opacity var(--fade-duracion) ease;
+  transition: opacity var(--fade) ease;
+   
 }
 
-/* JS agrega .activa → display flex + fade in */
-#bienvenida.activa {
+
+#intro-personajes.activo {
   display: flex;
+}
+
+#intro-personajes.visible {
   opacity: 1;
 }
 
-/* JS agrega .fade-out → desaparece antes de mostrar la invitación */
-#bienvenida.fade-out {
+#intro-personajes.fade-out {
   opacity: 0;
   pointer-events: none;
 }
 
 /*
-  El lemming de bienvenida.
-  Empieza fuera de pantalla abajo (translateY 100px)
-  y sube a su posición con la animación entradaLemming.
-  La animación se activa cuando JS agrega la clase .activa al padre.
+  La animación de personajes ocupa el centro.
+  max-height: 60vh → deja espacio para el botón abajo.
 */
-#lemming-bienvenida {
-  width: min(200px, 50vw);
-  filter: drop-shadow(0 10px 30px rgba(212, 169, 106, 0.4));
-  /*
-    opacity: 0 por defecto.
-    La animación lo hace aparecer — si no se ejecuta,
-    permanece invisible para evitar un flash.
-  */
-  opacity: 0;
-  animation: none; /* se activa desde JS agregando la clase .animar */
+
+.personajes-animacion{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.personajes-animacion video{
+  width: 100%; 
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  transition: opacity 1.5s ease;
 }
 
-#lemming-bienvenida.animar {
-  /*
-    entradaLemming: sube desde abajo con un pequeño rebote.
-    forwards: mantiene el estado final (opacity: 1, posición normal).
-  */
-  animation: entradaLemming 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+.personajes-animacion video.desvaneciendo {
+  opacity: 0;
 }
+
+.personajes-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 1.5s ease;
+  z-index: 1;
+}
+
+.personajes-overlay.oscurecer {
+  background: rgba(0, 0, 0, 0.55);
+}
+
 
 /*
-  El botón de entrar.
-  Empieza invisible y más chico (scale 0).
-  La animación popBoton lo hace aparecer con rebote.
-  animation-delay: 0.4s → espera a que el lemming llegue primero.
+  El botón flota encima de todo.
+  z-index: 2 → siempre visible.
+  Empieza invisible, JS lo anima cuando el overlay oscurece.
 */
 .btn-entrar {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
   font-size: 1.3rem;
   padding: 1rem 2.5rem;
   opacity: 0;
-  animation: none;
-  /*
-    box-shadow especial para que brille suavemente
-    sobre el fondo negro, llamando la atención.
-  */
-  box-shadow:
-    0 4px 0 var(--marron-osc),
-    0 0 30px rgba(212, 169, 106, 0.5);
+  transform: scale(0);
+  /* el resto del estilo lo hereda de .btn-madera */
 }
 
 .btn-entrar.animar {
-  /*
-    popBoton: aparece desde escala 0 con rebote.
-    0.4s de delay → el lemming ya llegó cuando aparece el botón.
-    forwards → mantiene el estado final (opacity: 1, escala normal).
-  */
-  animation: popBoton 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+  animation: popBoton 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/*
-  Brillo pulsante continuo después de que el botón aparece.
-  Le dice al usuario "tocame" sin necesitar texto.
-  Se activa con otra clase que JS agrega después del pop.
-*/
 .btn-entrar.brillar {
+  opacity: 1;
+  transform: scale(1) translateX(-50%);
   animation: brilloPulso 2s ease-in-out infinite;
 }
 
 
-/* ── 5. INVITACIÓN PRINCIPAL ──────────────────────────────────
-   Empieza invisible. JS le agrega .visible cuando el usuario
-   toca el botón de bienvenida.
-──────────────────────────────────────────────────────────────── */
+/* ── 5. INVITACIÓN PRINCIPAL ───────────────────────────────────
+   Empieza invisible. JS le agrega .visible.
+─────────────────────────────────────────────────────────────── */
 #invitacion {
   opacity: 0;
-  transition: opacity var(--fade-duracion) ease;
-  min-height: 100vh;
+  transition: opacity var(--fade) ease;
 }
 
 #invitacion.visible {
@@ -234,143 +226,279 @@ button {
 }
 
 
-/* ── 5. HERO ──────────────────────────────────────────────────
-   Primera sección. Fondo de la serie con overlay oscuro.
-──────────────────────────────────────────────────────────────── */
+/* ── 6. HERO — FONDO PARALLAX ─────────────────────────────────
+   El fondo de la serie cubre hero + tarjetas como un bloque.
+   background-attachment:fixed → parallax básico.
+   JS lo complementa para iOS donde fixed no funciona bien.
+─────────────────────────────────────────────────────────────── */
 .hero {
-  min-height: 100vh;
-
-  /*
-    background-attachment: fixed activa el parallax básico.
-    El fondo se mueve más lento que el contenido al hacer scroll.
-    NOTA: en iOS no funciona nativamente, JS lo va a compensar.
-  */
+  position: relative;
+  background-image: url('../assets/img/fondo-serie.jpg');
+  background-size: cover;
+  background-position: center top;
   background-attachment: fixed;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: center;
-  padding-top: 3rem;
-  position: relative;
+  /*
+    padding-bottom grande → deja espacio para que las
+    tarjetas sticky se desplieguen dentro de esta sección.
+    Ajustá según la altura de tus tarjetas.
+  */
+  padding-bottom: 60vh;
 }
 
 /*
   Overlay semitransparente encima del fondo.
-  Hace que el texto sea legible sin importar la imagen.
-  ::before es un pseudo-elemento, no necesita HTML extra.
+  Mejora legibilidad sin tapar la imagen.
+  ::before no necesita HTML extra.
 */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none; /* no bloquea clicks en el contenido */
 }
 
-/*
-  position: relative + z-index: 1 pone el contenido
-  por encima del overlay ::before.
-*/
-.hero-content {
+
+/* ── 7. CARTEL FLOTANTE ────────────────────────────────────────
+   El cartel "Mi primer añito" arriba del hero.
+─────────────────────────────────────────────────────────────── */
+.hero-cartel {
   position: relative;
-  z-index: 1;
+  z-index: 2; /* por encima del overlay ::before */
+  display: flex;
+  justify-content: center;
+  padding-top: 3rem;
+  padding-bottom: 4rem;
 }
 
-/*
-  clamp(mínimo, ideal, máximo) → el texto se adapta
-  al ancho de pantalla sin necesitar media queries.
-*/
-
-
-
-
-/*
-  El cartel flota con animación continua.
-  Se define la animación en la sección 10.
-*/
 .cartel {
-  max-width: min(95%, 720px);
-  margin-left: auto;
-  margin-right: auto;
+  max-width: min(90%, 500px);
   animation: flotar 3s ease-in-out infinite;
 }
 
 .cartel img {
   width: 100%;
-  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.7));
 }
 
 
-/* ── 6. SECCIÓN DATOS ─────────────────────────────────────────
-   Tres lemmings con botones de fecha, hora y ubicación.
-──────────────────────────────────────────────────────────────── */
-.seccion {
-  padding: 4rem 1.5rem;
-  text-align: center;
-}
-
-.seccion-datos {
-  /* background: var(--blanco); */
-}
-
-.seccion-titulo {
-  font-family: var(--font-titulo);
-  font-size: clamp(1.8rem, 6vw, 3rem);
-  color: var(--marron);
-  text-shadow: 2px 2px 0 var(--madera);
-  margin-bottom: 3rem;
-}
+/* ── 8. TARJETAS STICKY ────────────────────────────────────────
+   Las tarjetas se "pegan" al scrollear y la siguiente
+   empuja a la anterior hacia arriba — efecto card stack.
+─────────────────────────────────────────────────────────────── */
 
 /*
-  Grid de tres columnas para los lemmings.
-  auto-fit + minmax → se adapta automáticamente:
-  si no entran 3, se reorganizan en menos columnas.
+  El contenedor de tarjetas tiene altura suficiente para
+  que el scroll funcione. JS no necesita intervenir.
 */
-.datos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2.5rem;
-  max-width: 800px;
+.tarjetas-container {
+  position: relative;
+  z-index: 2;
+  /*
+    padding horizontal grande → deja espacio para los lemmings
+    que sobresalen a los costados (90px cada lado).
+  */
+  padding: 0 80px 20vh;
+  max-width: 700px;
   margin: 0 auto;
 }
 
-.dato-item {
+/*
+  BASE DE CADA TARJETA:
+  position:sticky → se pega cuando llega al top definido.
+  overflow:visible → permite que los lemmings sobresalgan.
+  La sombra grande genera sensación de profundidad/elevación.
+*/
+.tarjeta {
+  position: sticky;
+  overflow: visible; /* CRÍTICO: si fuera hidden los lemmings se recortarían */
+  border-radius: var(--radio-tarjeta);
+  margin-bottom: 2rem;
+
+  /*
+    box-shadow con múltiples capas → sombra más realista.
+    La sombra más difusa simula luz ambiente.
+  */
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/*
+  Tarjeta 1 se pega a 40px del tope.
+  Tarjeta 2 se pega un poco más abajo (60px) →
+  cuando aparece, "empuja" a la tarjeta 1 hacia arriba.
+  La diferencia de top crea el efecto de apilamiento.
+*/
+.tarjeta-datos {
+  top: 40px;
+  background: rgba(255, 248, 240, 0.96); /* blanco cálido semitransparente */
+  border: 3px solid var(--madera);
+}
+
+.tarjeta-rsvp {
+  top: 60px;
+  background: rgba(45, 90, 39, 0.97); /* verde bosque */
+  border: 3px solid var(--bosque-claro);
+}
+
+/* El interior de la tarjeta con padding generoso */
+.tarjeta-interior {
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.2rem;
+}
+
+
+/* ── 9. LEMMINGS DE TARJETA (COSTADOS) ────────────────────────
+   Posicionados absolute a los costados de la tarjeta.
+   Mitad afuera, mitad adentro — el efecto z-index 3.
+─────────────────────────────────────────────────────────────── */
+.lemming-tarjeta {
+  position: absolute;
+  width: 90px;       /* ancho base */
+  top: 50%;
+  transform: translateY(-50%); /* centrado vertical exacto */
+  z-index: 3;        /* por encima de la tarjeta */
+  cursor: pointer;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  transition: transform 0.15s ease;
 }
 
 /*
-  Los lemmings interactivos.
-  cursor: pointer indica que son clicables.
-  La animación de rebote se activa con JS al hacer click.
+  left: -45px → mitad del ancho (90/2) hacia afuera izquierda.
+  right: -45px → mitad del ancho hacia afuera derecha.
 */
-.lemming-interactivo {
-  width: 120px;
-  height: auto;
+.lemming-izq {
+  left: -45px;
+}
+
+.lemming-der {
+  right: -45px;
+  /*
+    scaleX(-1) espeja la imagen horizontalmente →
+    el lemming de la derecha mira hacia adentro de la tarjeta
+    sin necesitar una imagen separada.
+  */
+  transform: translateY(-50%) scaleX(-1);
+}
+
+/* Al presionar: se achica levemente */
+.lemming-tarjeta:active {
+  transform: translateY(-50%) scale(0.88);
+}
+
+.lemming-der:active {
+  transform: translateY(-50%) scaleX(-1) scale(0.88);
+}
+
+/* Clase que JS agrega al hacer click → animación de salto */
+.lemming-tarjeta.saltando {
+  animation: saltoLemming 0.4s ease;
+}
+
+
+/* ── 10. DATOS DENTRO DE TARJETA ──────────────────────────────
+   Filas de fecha y horario con lemming pequeño al lado.
+─────────────────────────────────────────────────────────────── */
+.tarjeta-titulo {
+  font-family: var(--font-titulo);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  color: var(--marron);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.tarjeta-rsvp .tarjeta-titulo {
+  color: var(--madera); /* en tarjeta verde el título es más claro */
+}
+
+/*
+  Cada fila: lemming pequeño a la izquierda, texto a la derecha.
+  gap entre ellos para que no queden pegados.
+*/
+.dato-fila {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0 0.5rem;
+}
+
+/*
+  El lemming pequeño dentro de la tarjeta (no los de costado).
+  También es interactivo y reproduce audio.
+*/
+.dato-lemming {
+  width: 55px;
+  flex-shrink: 0; /* no se achica aunque el contenedor sea chico */
   cursor: pointer;
   transition: transform 0.1s ease;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
-.lemming-interactivo:active {
-  transform: scale(0.9); /* se "aprieta" visualmente al tocarlo */
+.dato-lemming:active {
+  transform: scale(0.88);
 }
 
-/*
-  Clase que JS agrega al hacer click.
-  El lemming salta y vuelve.
-*/
-.lemming-interactivo.saltando {
-  animation: salto 0.4s ease;
+.dato-texto {
+  display: flex;
+  flex-direction: column;
+}
+
+.dato-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--marron-osc);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
+
+.dato-valor {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--negro);
 }
 
 
-/* ── BOTÓN MADERA ─────────────────────────────────────────────
-   Estilo rústico/caricaturesco para todos los botones.
-──────────────────────────────────────────────────────────────── */
+/* ── 11. BEBÉ + RSVP DENTRO DE TARJETA ───────────────────────
+   La caricatura del bebé y el botón de confirmación.
+─────────────────────────────────────────────────────────────── */
+.bebe-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#caricatura-bebe {
+  width: 140px;
+  border-radius: 50%;
+  border: 4px solid var(--madera);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  animation: flotar 4s ease-in-out infinite;
+  transition: transform 0.1s ease;
+}
+
+#caricatura-bebe:active {
+  transform: scale(0.93);
+}
+
+.bebe-texto {
+  font-family: var(--font-titulo);
+  color: var(--madera);
+  font-size: 0.9rem;
+  animation: parpadeo 2s ease-in-out infinite;
+}
+
+
+/* ── 12. BOTONES ──────────────────────────────────────────────
+   Estilo madera para todos los botones de la invitación.
+─────────────────────────────────────────────────────────────── */
 .btn-madera {
   background: var(--madera);
   color: var(--marron-osc);
@@ -378,18 +506,23 @@ button {
   font-size: 1rem;
   letter-spacing: 1px;
   padding: 0.8rem 1.8rem;
-  border-radius: 50px; /* bordes muy redondeados */
+  border-radius: 50px;
   border: 3px solid var(--marron);
+
+  /*
+    Doble sombra: la inferior da efecto 3D de botón físico,
+    la exterior es el glow suave.
+  */
   box-shadow:
-    0 4px 0 var(--marron-osc),  /* sombra inferior da efecto 3D */
-    0 6px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+    0 4px 0 var(--marron-osc),
+    0 6px 20px rgba(0, 0, 0, 0.25);
+
+  transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
 }
 
 /*
-  Al presionar: se "hunde" visualmente.
-  translateY(4px) lo baja 4px (igual que la sombra).
-  box-shadow: none elimina la sombra → parece que se apretó.
+  Al presionar: baja 4px (igual que la sombra) y pierde la sombra.
+  Simula un botón físico que se hunde.
 */
 .btn-madera:active {
   transform: translateY(4px);
@@ -400,78 +533,43 @@ button {
   background: var(--madera-osc);
 }
 
-
-/* ── 7. SECCIÓN RSVP / BEBÉ ───────────────────────────────────
-   Caricatura del bebé + botón de confirmación.
-──────────────────────────────────────────────────────────────── */
-.seccion-rsvp {
-  background: linear-gradient(180deg, var(--bosque) 0%, var(--bosque-claro) 100%);
-  /* mix-blend-mode: lighten; */
-  opacity: 0.75;
-  padding: 4rem 1.5rem;
-}
-
-.seccion-rsvp .seccion-titulo {
-  color: var(--madera);
-  text-shadow: 2px 2px 0 var(--marron-osc);
-}
-
-.bebe-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-/*
-  La caricatura del bebé. Más grande que los lemmings,
-  es el elemento principal de esta sección.
-*/
-#caricatura-bebe {
-  width: 180px;
-  border-radius: 50%;
-  border: 5px solid var(--madera);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-  animation: flotar 4s ease-in-out infinite; /* flota suavemente */
-}
-
-.bebe-texto {
-  font-family: var(--font-titulo);
-  color: var(--madera);
-  font-size: 1rem;
-  opacity: 0.8;
-  animation: parpadeo 2s ease-in-out infinite;
+.btn-ubicacion {
+  width: 100%;
+  margin-top: 0.5rem;
 }
 
 .btn-rsvp {
-  font-size: 1.2rem;
-  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  padding: 0.9rem 2rem;
   background: var(--madera);
 }
 
+.btn-confirmar {
+  width: 100%;
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
+}
 
-/* ── 8. MODAL RSVP ────────────────────────────────────────────
-   Ventana que aparece al confirmar asistencia.
-──────────────────────────────────────────────────────────────── */
+
+/* ── 13. MODAL RSVP ───────────────────────────────────────────
+   Ventana flotante de confirmación de asistencia.
+─────────────────────────────────────────────────────────────── */
 
 /*
   El overlay oscuro detrás del modal.
-  Cubre toda la pantalla con fondo semitransparente.
-  display: none → oculto por defecto, JS lo muestra.
+  display:none por defecto. JS le agrega .activo.
 */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 1000;
   align-items: center;
   justify-content: center;
   padding: 1rem;
 }
 
-/* Cuando JS agrega .activo, el modal se muestra */
 .modal-overlay.activo {
   display: flex;
   animation: fadeIn 0.3s ease;
@@ -479,8 +577,8 @@ button {
 
 /*
   La caja blanca del modal.
-  max-height + overflow-y: auto → si el contenido es largo,
-  aparece scroll interno en vez de salirse de pantalla.
+  max-height + overflow-y:auto → scroll interno si el contenido
+  es más alto que la pantalla.
 */
 .modal-contenido {
   background: var(--blanco);
@@ -496,23 +594,19 @@ button {
   animation: entradaModal 0.3s ease;
 }
 
-/* Botón X para cerrar el modal */
 .modal-cerrar {
   position: absolute;
   top: 1rem;
   right: 1rem;
   background: var(--marron);
   color: var(--blanco);
-  border: none;
   border-radius: 50%;
   width: 32px;
   height: 32px;
   font-size: 1.2rem;
-  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: background 0.2s;
 }
 
@@ -529,7 +623,6 @@ button {
   letter-spacing: 1px;
 }
 
-/* Campos del formulario */
 .campo {
   margin-bottom: 1.2rem;
 }
@@ -552,193 +645,219 @@ button {
   font-size: 1rem;
   background: #fff;
   color: var(--negro);
-  transition: border-color 0.2s;
   outline: none;
+  transition: border-color 0.2s;
 }
 
+/* Resalta el campo activo */
 .campo input:focus,
 .campo textarea:focus {
-  border-color: var(--marron); /* resalta al escribir */
+  border-color: var(--marron);
 }
 
 .campo textarea {
-  resize: none; /* el usuario no puede redimensionar el textarea */
+  resize: none;
 }
 
-.btn-confirmar {
-  width: 100%;
-  margin-top: 0.5rem;
-  font-size: 1.1rem;
-  padding: 1rem;
-}
-
-/* Mensaje de éxito después de enviar */
-.rsvp-exito {
+.rsvp-exito-texto {
+  font-family: var(--font-titulo);
+  font-size: 1.5rem;
+  color: var(--bosque);
   text-align: center;
   padding: 1rem;
-}
-
-.rsvp-exito p {
-  font-family: var(--font-titulo);
-  font-size: 1.4rem;
-  color: var(--bosque);
   letter-spacing: 1px;
 }
 
 
-/* ── 9. FOOTER ────────────────────────────────────────────────
-   Animación del oso + lemmings y CTA de Vision Design.
-──────────────────────────────────────────────────────────────── */
-footer {
-  background: var(--marron-osc);
+/* ── 14. SECCIÓN FINAL + ANIMACIÓN ───────────────────────────
+   El oso y los lemmings saludando después de las tarjetas.
+   Entra desde abajo cuando el usuario llega a esta sección.
+─────────────────────────────────────────────────────────────── */
+.seccion-final {
+  background: var(--bosque);
+  padding: 3rem 1rem 0;
   text-align: center;
-  overflow: hidden; /* recorta la animación si se sale */
-}
-
-.footer-animacion {
-  width: 100%;
-  max-height: 300px;
   overflow: hidden;
 }
 
-.footer-animacion img {
-  width: 100%;
-  object-fit: cover;
-  object-position: bottom;
+/*
+  Empieza invisible y bajada 60px.
+  JS agrega .visible cuando IntersectionObserver la detecta.
+*/
+.animacion-final {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.footer-visiondesign {
+.animacion-final.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.animacion-final img {
+  width: 100%;
+  object-fit: contain;
+}
+
+
+/* ── 15. FOOTER ───────────────────────────────────────────────
+   Logo Vision Design + Instagram + CTA.
+─────────────────────────────────────────────────────────────── */
+footer {
+  background: var(--marron-osc);
   padding: 2.5rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.footer-contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /*
-  filter: brightness(0) invert(1) convierte el logo a blanco
-  sin necesitar una versión blanca separada del archivo.
+  brightness(0) → lo pone negro.
+  invert(1)     → lo invierte a blanco.
+  Sin necesitar una versión blanca del logo.
 */
 .footer-logo {
   max-width: 140px;
-  margin: 0 auto 1rem;
+  margin-bottom: 0.5rem;
   filter: brightness(0) invert(1);
   opacity: 0.9;
 }
 
-.footer-visiondesign p {
+.footer-hecho {
   color: var(--madera);
   font-size: 0.9rem;
   opacity: 0.8;
 }
 
-.footer-visiondesign a {
-  display: block;
+.footer-instagram {
   color: var(--madera);
   font-weight: 900;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   text-decoration: none;
-  margin: 0.3rem 0;
   transition: color 0.2s;
 }
 
-.footer-visiondesign a:hover {
+.footer-instagram:hover {
   color: var(--blanco);
 }
 
 .footer-cta {
-  margin-top: 0.8rem !important;
+  color: var(--madera);
+  font-size: 0.85rem;
   font-style: italic;
-  font-size: 0.85rem !important;
+  opacity: 0.75;
+  margin-top: 0.3rem;
 }
 
 
-/* ── 10. ANIMACIONES ──────────────────────────────────────────
-   Todas las animaciones @keyframes en un solo lugar.
-──────────────────────────────────────────────────────────────── */
+/* ── 16. ANIMACIONES @keyframes ───────────────────────────────
+   Todas las animaciones en un solo lugar.
+─────────────────────────────────────────────────────────────── */
 
-/* El cartel y la caricatura suben y bajan suavemente */
+/* Cartel y bebé flotan suavemente arriba y abajo */
 @keyframes flotar {
-  0%, 100% { transform: translateY(0px); }
+  0%, 100% { transform: translateY(0px);   }
   50%       { transform: translateY(-12px); }
 }
 
-/*
-  El lemming de bienvenida sube desde abajo.
-  cubic-bezier(0.34, 1.56, 0.64, 1) → curva con rebote natural,
-  se llama "back ease out", simula una pelota que rebota al llegar.
-*/
-@keyframes entradaLemming {
-  0%   { opacity: 0; transform: translateY(80px) scale(0.8); }
-  100% { opacity: 1; transform: translateY(0)    scale(1);   }
-}
-
-/*
-  El botón aparece desde escala 0 con rebote.
-  Misma curva que el lemming para coherencia visual.
-*/
+/* Botón entrar aparece con rebote desde escala 0 */
 @keyframes popBoton {
   0%   { opacity: 0; transform: scale(0);    }
   100% { opacity: 1; transform: scale(1);    }
 }
 
-/*
-  Brillo pulsante del botón para invitar al usuario a tocarlo.
-  box-shadow crece y decrece suavemente.
-*/
+/* Brillo pulsante del botón entrar */
 @keyframes brilloPulso {
   0%, 100% { box-shadow: 0 4px 0 var(--marron-osc), 0 0 20px rgba(212,169,106,0.3); }
   50%       { box-shadow: 0 4px 0 var(--marron-osc), 0 0 45px rgba(212,169,106,0.8); }
 }
 
-/* El lemming salta al tocarlo */
-@keyframes salto {
-  0%   { transform: translateY(0) scale(1); }
-  30%  { transform: translateY(-20px) scale(1.1); }
-  60%  { transform: translateY(0) scale(0.95); }
-  100% { transform: translateY(0) scale(1); }
+/* Lemming salta al tocarlo */
+@keyframes saltoLemming {
+  0%   { transform: translateY(-50%) scale(1);    }
+  30%  { transform: translateY(-80%) scale(1.15); }
+  60%  { transform: translateY(-50%) scale(0.92); }
+  100% { transform: translateY(-50%) scale(1);    }
 }
 
-/* El texto "tocame" parpadea para llamar la atención */
+/* El lemming derecho espejado también salta */
+.lemming-der.saltando {
+  animation: saltoLemmingDer 0.4s ease;
+}
+
+@keyframes saltoLemmingDer {
+  0%   { transform: translateY(-50%) scaleX(-1) scale(1);    }
+  30%  { transform: translateY(-80%) scaleX(-1) scale(1.15); }
+  60%  { transform: translateY(-50%) scaleX(-1) scale(0.92); }
+  100% { transform: translateY(-50%) scaleX(-1) scale(1);    }
+}
+
+/* El texto "tocame" parpadea */
 @keyframes parpadeo {
   0%, 100% { opacity: 0.8; }
-  50%       { opacity: 0.3; }
+  50%       { opacity: 0.2; }
 }
 
-/* Fade in genérico para el modal */
+/* Fade in genérico */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-/* El modal entra desde abajo */
+/* Modal entra desde abajo */
 @keyframes entradaModal {
   from { transform: translateY(30px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
 
-/* ── 11. RESPONSIVE MOBILE ────────────────────────────────────
-   Ajustes para pantallas pequeñas (menos de 480px).
-──────────────────────────────────────────────────────────────── */
-@media (max-width: 480px) {
+/* ── 17. RESPONSIVE MOBILE ────────────────────────────────────
+   Ajustes para pantallas pequeñas (menos de 500px).
+─────────────────────────────────────────────────────────────── */
+@media (max-width: 500px) {
 
   /*
-    En iOS background-attachment: fixed no funciona bien.
-    Lo reemplazamos con scroll normal en mobile.
-    El parallax con JS lo vamos a resolver en main.js
+    background-attachment:fixed no funciona en iOS.
+    Lo desactivamos y JS maneja el parallax.
   */
   .hero {
     background-attachment: scroll;
   }
 
-  .datos-grid {
-    grid-template-columns: 1fr; /* una columna en mobile */
-    gap: 2rem;
+  /*
+    En mobile los lemmings de costado se achican un poco
+    para que no salgan demasiado de la pantalla.
+  */
+  .lemming-tarjeta {
+    width: 70px;
   }
 
-  .lemming-interactivo {
-    width: 100px;
+  .lemming-izq {
+    left: -35px;
   }
 
-  #caricatura-bebe {
-    width: 150px;
+  .lemming-der {
+    right: -35px;
+  }
+
+  /*
+    Menos padding lateral para los lemmings más chicos.
+  */
+  .tarjetas-container {
+    padding: 0 60px 20vh;
+  }
+
+  .btn-entrar {
+    font-size: 1.1rem;
+    padding: 0.9rem 2rem;
   }
 
 }
