@@ -149,6 +149,18 @@ function mostrarPersonajes() {
 */
 function entrarInvitacion() {
 
+  // Arranca la música cuando el usuario toca el botón
+  // Este tap ya desbloqueó el audio en iOS, así que play() funciona seguro
+  const musicaFondo = document.getElementById('musica-fondo')
+  musicaFondo.volume = 0        // empieza en silencio
+  musicaFondo.play()
+
+  // Fade in del volumen suave — sube de 0 a 0.4 en 2 segundos
+  // No queremos que explote de golpe
+  fadeVolumen(musicaFondo, 0, 0.4, 2000)
+
+
+
   /* 1. Fade out del intro completo (capa de personajes) */
   introPersonajes.classList.add('fade-out')
 
@@ -413,4 +425,33 @@ function mostrarExitoRSVP() {
 function abrirMaps() {
   const direccion = encodeURIComponent('Av. Ejemplo 1234, Marcos Paz, Buenos Aires')
   window.open(`https://maps.google.com/?q=${direccion}`, '_blank')
+}
+
+/*
+  Sube o baja el volumen gradualmente.
+  elemento  → el <audio>
+  desde     → volumen inicial (0 = silencio)
+  hasta     → volumen final (1 = máximo, 0.4 = suave)
+  duracion  → en milisegundos
+*/
+function fadeVolumen(elemento, desde, hasta, duracion) {
+  const pasos = 30                        // cantidad de pasos del fade
+  const intervalo = duracion / pasos      // tiempo entre cada paso
+  const incremento = (hasta - desde) / pasos
+
+  let volumenActual = desde
+  elemento.volume = volumenActual
+
+  const timer = setInterval(() => {
+    volumenActual += incremento
+
+    // Clamp: asegura que el volumen no se salga de 0-1
+    volumenActual = Math.min(Math.max(volumenActual, 0), 1)
+    elemento.volume = volumenActual
+
+    // Cuando llegamos al volumen final, paramos
+    if (Math.abs(volumenActual - hasta) < 0.01) {
+      clearInterval(timer)
+    }
+  }, intervalo)
 }

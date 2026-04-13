@@ -84,139 +84,106 @@
   </div><!-- fin #intro -->
 
 
-  <!-- ========================================================
+   <!-- ========================================================
     INVITACIÓN PRINCIPAL
-    Empieza invisible (opacity:0 en CSS).
-    JS le agrega la clase .visible cuando el usuario
-    toca el botón "Ver la invitación".
+    Empieza invisible. JS agrega .visible al tocar el botón.
   ======================================================== -->
   <div id="invitacion">
-
-    <!-- ── HERO + TARJETAS ───────────────────────────────────
-      Una sola sección que contiene todo:
-      el fondo de la serie cubre hero y tarjetas como un bloque.
-      Arriba: el cartel de Tadeo flotando.
-      Abajo: las tarjetas sticky que se superponen al scrollear.
+ 
+    <!-- ── HERO + CONVERSACIÓN ───────────────────────────────
+      Fondo de la serie cubre todo el alto de esta sección.
+      Arriba: cartel de Tadeo flotando.
+      Abajo: conversación de lemmings con burbujas de chat.
     ──────────────────────────────────────────────────────── -->
     <section class="hero">
-
-      <!-- Cartel "Mi primer añito" flotando arriba del todo -->
+ 
+      <!-- Cartel "Mi primer añito" flotando arriba -->
       <div class="hero-cartel">
         <div class="cartel">
           <img
-            src="assets/img/cartel-primer-anito.png"
+            src="assets/cartel.png"
             alt="Tadeo - Mi primer añito"
           />
         </div>
       </div>
-
-      <!-- ── TARJETAS STICKY ────────────────────────────────
-        Contenedor de las tarjetas.
-        Cada tarjeta tiene position:sticky en CSS →
-        se queda pegada mientras scrolleás hasta que
-        la siguiente la empuja hacia arriba.
-        Los lemmings están absolutos a los costados,
-        mitad afuera mitad adentro (z-index:3).
+ 
+      <!-- ── CONVERSACIÓN DE LEMMINGS ────────────────────────
+        Cada .chat-fila es un lemming + burbuja de chat.
+        Alternan izquierda y derecha como WhatsApp.
+        .desde-izq → entra desde la izquierda al hacer scroll.
+        .desde-der → entra desde la derecha al hacer scroll.
+        IntersectionObserver en JS dispara la animación.
       ─────────────────────────────────────────────────────── -->
-      <div class="tarjetas-container">
-
-        <!-- TARJETA 1 — Datos del evento -->
-        <div class="tarjeta tarjeta-datos">
-
+      <div class="chat-container">
+ 
+        <!-- FILA 1 — Fecha (lemming izquierdo habla) -->
+        <div class="chat-fila desde-izq" data-delay="0">
           <!--
-            Lemmings a los costados.
-            position:absolute en CSS los ubica mitad afuera.
-            left:-45px / right:-45px → mitad del ancho (90px/2).
-            z-index:3 → por encima de la tarjeta.
-            data-audio → el audio que suenan al tocarse.
+            El lemming es interactivo — al tocarlo suena el audio
+            definido en data-audio.
           -->
           <img
-            class="lemming-tarjeta lemming-izq lemming-interactivo"
+            class="chat-lemming lemming-interactivo"
             src="assets/img/lemming-pose-1.png"
             alt="Lemming"
             data-audio="assets/audio/tabodi-1.mp3"
           />
+          <!--
+            burbuja-izq → la colita del globo apunta a la izquierda
+            (hacia el lemming). Se dibuja con ::before en CSS.
+          -->
+          <div class="burbuja burbuja-izq">
+            <span class="burbuja-label">¡El cumple es el!</span>
+            <span class="burbuja-valor">Viernes 8 de Mayo</span>
+            <span class="burbuja-anio">2026 🎉</span>
+          </div>
+        </div>
+ 
+        <!-- FILA 2 — Hora (lemming derecho habla) -->
+        <div class="chat-fila desde-der" data-delay="150">
+          <div class="burbuja burbuja-der">
+            <span class="burbuja-label">¡Arrancamos a las!</span>
+            <span class="burbuja-valor">14:00 hs 🕑</span>
+          </div>
           <img
-            class="lemming-tarjeta lemming-der lemming-interactivo"
+            class="chat-lemming lemming-interactivo"
             src="assets/img/lemming-pose-2.png"
+            alt="Lemming"
+            data-audio="assets/audio/tabodi-2.mp3"
+          />
+        </div>
+ 
+        <!-- FILA 3 — Ubicación (lemming izquierdo habla) -->
+        <div class="chat-fila desde-izq" data-delay="300">
+          <img
+            class="chat-lemming lemming-interactivo"
+            src="assets/img/lemming-pose-3.png"
             alt="Lemming"
             data-audio="assets/audio/risa-lemmings.mp3"
           />
-
-          <div class="tarjeta-interior">
-
-            <h2 class="tarjeta-titulo">¿Cuándo y dónde?</h2>
-
+          <div class="burbuja burbuja-izq">
+            <span class="burbuja-label">¡Te esperamos en!</span>
             <!--
-              Cada fila tiene un lemming pequeño interactivo
-              y el dato correspondiente.
-            -->
-            <div class="dato-fila">
-              <img
-                class="dato-lemming lemming-interactivo"
-                src="assets/img/lemming-fecha.png"
-                alt="Fecha"
-                data-audio="assets/audio/tabodi-2.mp3"
-              />
-              <div class="dato-texto">
-                <span class="dato-label">Fecha</span>
-                <!-- Reemplazá con la fecha real -->
-                <span class="dato-valor">Sábado 14 de Junio</span>
-              </div>
-            </div>
-
-            <div class="dato-fila">
-              <img
-                class="dato-lemming lemming-interactivo"
-                src="assets/img/lemming-hora.png"
-                alt="Hora"
-                data-audio="assets/audio/tabodi-1.mp3"
-              />
-              <div class="dato-texto">
-                <span class="dato-label">Horario</span>
-                <!-- Reemplazá con el horario real -->
-                <span class="dato-valor">17:00 hs</span>
-              </div>
-            </div>
-
-            <!--
-              Botón ubicación → abre Google Maps.
-              La dirección se configura en main.js → abrirMaps().
+              El botón abre Google Maps con la dirección real.
+              abrirMaps() está en main.js.
             -->
             <button
               class="btn-madera btn-ubicacion"
               onclick="abrirMaps()"
             >
-              📍 Ver ubicación
+              📍 Las Anémonas 341, Merlo
             </button>
-
           </div>
-        </div><!-- fin tarjeta-datos -->
-
-
-        <!-- TARJETA 2 — RSVP -->
-        <div class="tarjeta tarjeta-rsvp">
-
-          <img
-            class="lemming-tarjeta lemming-izq lemming-interactivo"
-            src="assets/img/lemming-pose-3.png"
-            alt="Lemming"
-            data-audio="assets/audio/tabodi-2.mp3"
-          />
-          <img
-            class="lemming-tarjeta lemming-der lemming-interactivo"
-            src="assets/img/lemming-pose-4.png"
-            alt="Lemming"
-            data-audio="assets/audio/risa-lemmings.mp3"
-          />
-
-          <div class="tarjeta-interior">
-
-            <h2 class="tarjeta-titulo">¿Venís?</h2>
-
+        </div>
+ 
+        <!-- FILA 4 — RSVP (lemming derecho habla) -->
+        <div class="chat-fila desde-der" data-delay="450">
+          <div class="burbuja burbuja-der burbuja-rsvp">
+            <span class="burbuja-label">¿Vas a venir? 👀</span>
+ 
             <!--
-              Caricatura del bebé — al tocarla suena su risa.
-              Usa la misma lógica que los lemmings (data-audio).
+              Caricatura del bebé interactiva.
+              Al tocarla suena la risa de Tadeo.
             -->
             <div class="bebe-container">
               <img
@@ -228,42 +195,40 @@
               />
               <p class="bebe-texto">¡Tocame!</p>
             </div>
-
+ 
             <button
               class="btn-madera btn-rsvp"
               onclick="abrirRSVP()"
             >
               ¡Confirmá tu lugar!
             </button>
-
           </div>
-        </div><!-- fin tarjeta-rsvp -->
-
-      </div><!-- fin tarjetas-container -->
-
+          <img
+            class="chat-lemming lemming-interactivo"
+            src="assets/img/lemming-pose-4.png"
+            alt="Lemming"
+            data-audio="assets/audio/tabodi-1.mp3"
+          />
+        </div>
+ 
+      </div><!-- fin chat-container -->
+ 
     </section><!-- fin hero -->
-
-
+ 
+ 
     <!-- ── MODAL RSVP ──────────────────────────────────────
-      Ventana flotante que aparece al tocar "Confirmá tu lugar".
-      Empieza oculto (display:none en CSS).
-      JS le agrega .activo para mostrarlo.
-      onclick en el overlay cierra si tocás afuera del modal.
+      Oculto por defecto. JS agrega .activo al abrirlo.
+      onclick en el overlay cierra si tocás afuera.
     ─────────────────────────────────────────────────────── -->
     <div id="modal-rsvp" class="modal-overlay" onclick="cerrarRSVP(event)">
       <div class="modal-contenido">
-
-        <!-- Botón X para cerrar -->
+ 
         <button class="modal-cerrar" onclick="cerrarRSVP()">&times;</button>
-
+ 
         <h3 class="modal-titulo">¡Confirmá tu asistencia!</h3>
-
-        <!--
-          onsubmit llama a enviarRSVP(event) en main.js.
-          event.preventDefault() evita que recargue la página.
-        -->
+ 
         <form id="form-rsvp" onsubmit="enviarRSVP(event)">
-
+ 
           <div class="campo">
             <label for="nombre">Tu nombre</label>
             <input
@@ -273,7 +238,7 @@
               required
             />
           </div>
-
+ 
           <div class="campo">
             <label for="personas">¿Cuántos vienen?</label>
             <input
@@ -285,7 +250,7 @@
               required
             />
           </div>
-
+ 
           <div class="campo">
             <label for="mensaje">Mensaje para Tadeo (opcional)</label>
             <textarea
@@ -294,34 +259,26 @@
               rows="3"
             ></textarea>
           </div>
-
+ 
           <button type="submit" class="btn-madera btn-confirmar">
             ¡Vamos a la fiesta!
           </button>
-
+ 
         </form>
-
-        <!-- Aparece después de enviar, oculto por defecto -->
+ 
         <div id="rsvp-exito" style="display:none;">
           <p class="rsvp-exito-texto">🐻 ¡Nos vemos en la fiesta!</p>
         </div>
-
+ 
       </div>
     </div>
-
-
-    <!-- ── SECCIÓN FINAL ────────────────────────────────────
-      El oso y los lemmings saludando.
-      Aparece después de las tarjetas.
-      IntersectionObserver en JS detecta cuando
-      el usuario llega acá y dispara la animación de entrada.
+ 
+ 
+    <!-- ── ANIMACIÓN FINAL ──────────────────────────────────
+      Oso + lemmings saludando.
+      Entra desde abajo cuando el usuario llega a esta sección.
     ─────────────────────────────────────────────────────── -->
     <div class="seccion-final">
-      <!--
-        La animación entra desde abajo cuando el usuario
-        llega a esta sección. JS agrega la clase .visible
-        via IntersectionObserver.
-      -->
       <div class="animacion-final" id="animacion-final">
         <img
           src="assets/img/animacion-oso-saludo.gif"
@@ -329,6 +286,15 @@
         />
       </div>
     </div>
+
+    <!--
+  loop → se repite cuando termina
+  preload → empieza a cargar antes de que el usuario toque el botón
+  No tiene autoplay → el usuario lo inicia con el botón
+-->
+<audio id="musica-fondo" loop preload="auto">
+  <!-- <source src="assets/soundtrack.mp3" type="audio/mp3" /> -->
+</audio>
 
 
     <!-- ── FOOTER VISION DESIGN ────────────────────────────
