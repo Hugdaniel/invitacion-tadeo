@@ -179,6 +179,14 @@ function entrarInvitacion() {
     */
     iniciarParallax()
 
+     /*
+      Iniciamos el observer del chat AQUÍ, después de que
+      la invitación es visible. Si lo iniciamos antes,
+      el navegador detecta todas las filas como visibles
+      porque el elemento padre no ocupaba espacio en pantalla.
+    */
+    iniciarObserverChat()
+
   }, 800)
 }
 
@@ -276,6 +284,53 @@ function aplicarParallax() {
   */
   const offset = window.scrollY * 0.35
   hero.style.backgroundPositionY = `calc(top + ${offset}px)`
+}
+
+/* ── INTERSECTIONOBSERVER — BURBUJAS DE CHAT ──────────────────
+   Cada .chat-fila entra con animación cuando el usuario
+   llega a ella al hacer scroll.
+   Las filas aparecen de a una con delay escalonado,
+   como si los lemmings fueran escribiendo en secuencia.
+─────────────────────────────────────────────────────────────── */
+function iniciarObserverChat() {
+const filasChat = document.querySelectorAll('.chat-fila')
+
+/*
+  threshold: 0.2 → se dispara cuando el 20% de la fila
+  entra al viewport. Más bajo que el final porque
+  las filas son elementos más pequeños.
+*/
+const observadorChat = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+
+      const fila = entry.target
+
+      /*
+        Leemos el data-delay del HTML.
+        parseInt convierte el string "150" al número 150.
+        Si no tiene el atributo, usamos 0 como fallback.
+      */
+      const delay = parseInt(fila.dataset.delay) || 0
+
+      setTimeout(() => {
+        fila.classList.add('visible')
+      }, delay)
+
+      /*
+        Dejamos de observar esta fila una vez que apareció.
+        Sin esto se re-animaría cada vez que el usuario
+        hace scroll arriba y vuelve a bajar.
+      */
+      observadorChat.unobserve(fila)
+    }
+  })
+}, { threshold: 0.2 })
+
+/* Observamos cada fila individualmente */
+filasChat.forEach(fila => {
+  observadorChat.observe(fila)
+})
 }
 
 

@@ -89,6 +89,7 @@ button {
   inset: 0;
   z-index: 9999;
   background: #000;
+  overflow: hidden;
 }
 
 /*
@@ -132,6 +133,7 @@ button {
   padding: 2rem;
   opacity: 0;
   transition: opacity var(--fade) ease;
+  overflow: hidden;
    
 }
 
@@ -163,6 +165,7 @@ button {
   width: 100%; 
   height: 100%;
   object-fit: cover;
+  object-position: center center;
   mix-blend-mode: screen;
   transition: opacity 1.5s ease;
 }
@@ -193,12 +196,11 @@ button {
   position: absolute;
   bottom: 2.5rem;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%)scale(0);
   z-index: 2;
   font-size: 1.3rem;
   padding: 1rem 2.5rem;
   opacity: 0;
-  transform: scale(0);
   /* el resto del estilo lo hereda de .btn-madera */
 }
 
@@ -219,6 +221,7 @@ button {
 #invitacion {
   opacity: 0;
   transition: opacity var(--fade) ease;
+  overflow: hidden;
 }
  
 #invitacion.visible {
@@ -270,15 +273,20 @@ button {
   justify-content: center;
   padding-top: 3rem;
   padding-bottom: 4rem;
+  width: 100%;
+  
 }
  
 .cartel {
-  max-width: min(90%, 500px);
+  max-width: 650px;
+  width: 85vw;
   animation: flotar 3s ease-in-out infinite;
+  margin-top: 30vh;
 }
  
 .cartel img {
   width: 100%;
+  height: auto;
   filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.7));
 }
  
@@ -303,6 +311,7 @@ button {
   padding: 2rem 1rem 5rem;
   max-width: 600px;
   margin: 0 auto;
+  margin-top: 50vh;
 }
  
 /*
@@ -320,6 +329,7 @@ button {
   gap: 0.8rem;
   opacity: 0;
   transition: opacity 0.6s ease, transform 0.6s ease;
+  margin-bottom: 8vh;
 }
  
 /*
