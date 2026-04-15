@@ -114,104 +114,37 @@
         .desde-der → entra desde la derecha al hacer scroll.
         IntersectionObserver en JS dispara la animación.
       ─────────────────────────────────────────────────────── -->
-      <div class="chat-container">
- 
-        <!-- FILA 1 — Fecha (lemming izquierdo habla) -->
-        <div class="chat-fila desde-izq" data-delay="150">
-          <!--
-            El lemming es interactivo — al tocarlo suena el audio
-            definido en data-audio.
-          -->
-          <img
-            class="chat-lemming lemming-interactivo"
-            src="assets/tabodi-1.png"
-            alt="Lemming"
-            data-audio="assets/tabodi.mp3"
-          />
-          <!--
-            burbuja-izq → la colita del globo apunta a la izquierda
-            (hacia el lemming). Se dibuja con ::before en CSS.
-          -->
-          <div class="burbuja burbuja-izq">
-            <span class="burbuja-label">¡El cumple es el!</span>
-            <span class="burbuja-valor">Viernes 8 de Mayo</span>
-            <span class="burbuja-anio">2026 🎉</span>
-          </div>
-        </div>
- 
-        <!-- FILA 2 — Hora (lemming derecho habla) -->
-        <div class="chat-fila desde-der" data-delay="280">
-          <div class="burbuja burbuja-der">
-            <span class="burbuja-label">¡Arrancamos a las!</span>
-            <span class="burbuja-valor">14:00 hs 🕑</span>
-          </div>
-          <img
-            class="chat-lemming lemming-interactivo"
-            src="assets/tabodi-2.png"
-            alt="Lemming"
-            data-audio="assets/risa-tabodi.mp3"
-          />
-        </div>
- 
-        <!-- FILA 3 — Ubicación (lemming izquierdo habla) -->
-        <div class="chat-fila desde-izq" data-delay="350">
-          <img
-            class="chat-lemming lemming-interactivo"
-            src="assets/tabodi-3.png"
-            alt="Lemming"
-            data-audio="assets/risa-tabodi.mp3"
-          />
-          <div class="burbuja burbuja-izq">
-            <span class="burbuja-label">¡Te esperamos en!</span>
-            <!--
-              El botón abre Google Maps con la dirección real.
-              abrirMaps() está en main.js.
-            -->
-            <button
-              class="btn-madera btn-ubicacion"
-              onclick="abrirMaps()"
-            >
-              📍 Las Anémonas 341, Merlo
-            </button>
-          </div>
-        </div>
- 
-        <!-- FILA 4 — RSVP (lemming derecho habla) -->
-        <div class="chat-fila desde-der" data-delay="450">
-          <div class="burbuja burbuja-der burbuja-rsvp">
-            <span class="burbuja-label">¿Vas a venir? 👀</span>
- 
-            <!--
-              Caricatura del bebé interactiva.
-              Al tocarla suena la risa de Tadeo.
-            -->
-            <div class="bebe-container">
-              <img
-                id="caricatura-bebe"
-                class="lemming-interactivo"
-                src="assets/img/caricatura-bebe.png"
-                alt="Tadeo"
-                data-audio="assets/audio/risa-bebe.mp3"
-              />
-              <p class="bebe-texto">¡Tocame!</p>
-            </div>
- 
-            <button
-              class="btn-madera btn-rsvp"
-              onclick="abrirRSVP()"
-            >
-              ¡Confirmá tu lugar!
-            </button>
-          </div>
-          <img
-            class="chat-lemming lemming-interactivo"
-            src="assets/tabodi-4.png"
-            alt="Lemming"
-            data-audio="assets/audio/tabodi.mp3"
-          />
-        </div>
- 
-      </div><!-- fin chat-container -->
+
+      <!-- TARJETA DE INFO + RSVP -->
+<div class="tarjeta-info">
+
+  <div class="info-fila">
+    <span class="info-label">Fecha</span>
+    <span class="info-valor">Viernes 8 de Mayo 2026</span>
+  </div>
+
+  <div class="info-separador"></div>
+
+  <div class="info-fila">
+    <span class="info-label">Horario</span>
+    <span class="info-valor">14:00 hs</span>
+  </div>
+
+  <div class="info-separador"></div>
+
+  <button class="btn-madera btn-ubicacion" onclick="abrirMaps()">
+    Las Anémonas 341, Merlo
+  </button>
+
+  <div class="info-divisor"></div>
+
+  <p class="info-pregunta">¿Vas a venir?</p>
+
+  <button class="btn-madera btn-rsvp" onclick="abrirRSVP()">
+    ¡Confirmá tu lugar!
+  </button>
+
+</div> 
  
     </section><!-- fin hero -->
  
@@ -280,10 +213,7 @@
     ─────────────────────────────────────────────────────── -->
     <div class="seccion-final">
       <div class="animacion-final" id="animacion-final">
-        <img
-          src="assets/img/animacion-oso-saludo.gif"
-          alt="Grizzy y los lemmings saludando"
-        />
+        <video src="assets/animation.mp4" autoplay muted loop playsinline type="video/mp4"></video>
       </div>
     </div>
 

@@ -66,6 +66,10 @@ body {
   background: #000; /* negro base, el fondo de la serie lo tapa */
   color: var(--negro);
   overflow-x: hidden;
+  background-image: url('../assets/fondo.png');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
 }
 
 img {
@@ -236,17 +240,13 @@ button {
 ─────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  background-image: url('../assets/fondo.png');
-  background-size: cover;
-  background-position: center top;
-  background-attachment: fixed;
+  
  
   /*
     padding-bottom grande → deja espacio para que las
     tarjetas sticky se desplieguen dentro de esta sección.
     Ajustá según la altura de tus tarjetas.
   */
-  padding-bottom: 60vh;
 }
  
 /*
@@ -297,215 +297,79 @@ button {
    Cada fila entra con animación al hacer scroll.
 ─────────────────────────────────────────────────────────────── */
  
-/*
-  Contenedor de toda la conversación.
-  padding lateral para que las burbujas no toquen el borde.
-  padding-bottom para que el último elemento tenga aire.
-*/
-.chat-container {
+
+ 
+.tarjeta-info {
   position: relative;
   z-index: 2;
+  background: rgba(255, 248, 240, 0.25);
+  backdrop-filter: blur(8px);
+  border-radius: 24px;
+  border: 3px solid var(--madera);
+  padding: 2rem 1.8rem;
+  max-width: 360px;
+  margin: 60vh auto 8rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 2rem 1rem 5rem;
-  max-width: 600px;
-  margin: 0 auto;
-  margin-top: 50vh;
+  gap: 1.2rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
- 
-/*
-  BASE DE CADA FILA:
-  display:flex → lemming y burbuja en línea.
-  align-items:flex-end → se alinean por abajo como WhatsApp real.
-  gap → espacio entre el lemming y la burbuja.
- 
-  Estado inicial: invisible y desplazada.
-  JS agrega .visible cuando entra al viewport.
-*/
-.chat-fila {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.8rem;
-  opacity: 0;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-  margin-bottom: 8vh;
-}
- 
-/*
-  .desde-izq → entra desde la izquierda.
-  translateX negativo = desplazada hacia la izquierda.
-*/
-.chat-fila.desde-izq {
-  transform: translateX(-40px);
-  justify-content: flex-start;
-}
- 
-/*
-  .desde-der → entra desde la derecha.
-  translateX positivo = desplazada hacia la derecha.
-*/
-.chat-fila.desde-der {
-  transform: translateX(40px);
-  justify-content: flex-end;
-}
- 
-/*
-  Cuando JS agrega .visible:
-  opacity sube a 1 y translateX vuelve a 0.
-  La transition de arriba anima ambas propiedades.
-*/
-.chat-fila.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
- 
-/*
-  El lemming de cada fila.
-  Tamaño generoso para que sea el protagonista visual.
-  filter: drop-shadow → sombra que respeta la transparencia del PNG.
-*/
-.chat-lemming {
-  width: 80px;
-  flex-shrink: 0;
-  cursor: pointer;
-  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.5));
-  transition: transform 0.1s ease;
-}
- 
-.chat-lemming:active {
-  transform: scale(0.88);
-}
- 
-.chat-lemming.saltando {
-  animation: saltoLemming 0.4s ease;
-}
- 
- 
-/* ── BURBUJAS DE CHAT ──────────────────────────────────────────
-   Globos de diálogo estilo WhatsApp con colita apuntando
-   al lemming correspondiente. La colita es un ::before en CSS,
-   no necesita HTML extra.
-─────────────────────────────────────────────────────────────── */
-.burbuja {
-  position: relative;
+
+.info-fila {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding: 1rem 1.2rem;
-  border-radius: 18px;
-  max-width: 75%;
- 
-  /*
-    Sombra pronunciada para que destaque sobre el fondo de la serie.
-  */
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  gap: 0.2rem;
 }
- 
-/*
-  Burbuja izquierda (lemming izquierdo habla):
-  fondo blanco cálido, colita a la izquierda abajo.
-  border-bottom-left-radius: 4px → esquina chata donde va la colita.
-*/
-.burbuja-izq {
-  background: rgba(255, 248, 240, 0.97);
-  border-bottom-left-radius: 4px;
-}
- 
-/*
-  La colita de la burbuja izquierda.
-  Es un triángulo CSS — border trick clásico.
-  position:absolute la ubica fuera de la burbuja abajo a la izquierda.
-*/
-.burbuja-izq::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: -10px;
-  width: 0;
-  height: 0;
-  /*
-    Triángulo CSS: borde superior coloreado, los demás transparentes.
-    border-top: alto del triángulo y su color.
-    border-right: ancho del triángulo (apunta a la izquierda).
-  */
-  border-top: 12px solid rgba(255, 248, 240, 0.97);
-  border-left: 10px solid transparent;
-}
- 
-/*
-  Burbuja derecha (lemming derecho habla):
-  fondo verde bosque, colita a la derecha abajo.
-*/
-.burbuja-der {
-  background: rgba(45, 90, 39, 0.97);
-  border-bottom-right-radius: 4px;
-}
- 
-.burbuja-der::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: -10px;
-  width: 0;
-  height: 0;
-  border-top: 12px solid rgba(45, 90, 39, 0.97);
-  border-right: 10px solid transparent;
-}
- 
-/*
-  Texto secundario dentro de la burbuja — lo que "dice" el lemming.
-  Tamaño pequeño, como el texto de encabezado de un mensaje.
-*/
-.burbuja-label {
+
+.info-label {
   font-family: var(--font-cuerpo);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--marron);
-  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--negro);
+  opacity: 0.6;
 }
- 
-.burbuja-der .burbuja-label {
-  color: var(--madera);
-}
- 
-/*
-  El dato principal — fecha, hora — en grande y bold.
-*/
-.burbuja-valor {
+
+.info-valor {
   font-family: var(--font-titulo);
   font-size: clamp(1.3rem, 5vw, 1.8rem);
-  color: var(--marron-osc);
+  color: var(--madera);
   letter-spacing: 1px;
-  line-height: 1.1;
 }
- 
-.burbuja-der .burbuja-valor {
-  color: var(--madera);
+
+/* Línea separadora entre fecha y hora */
+.info-separador {
+  height: 1px;
+  background: var(--madera);
+  opacity: 0.3;
 }
- 
-/*
-  El año — más chico que el valor principal.
-*/
-.burbuja-anio {
+
+/* Línea divisora más gruesa entre info y RSVP */
+.info-divisor {
+  height: 2px;
+  background: var(--madera);
+  opacity: 0.5;
+  margin: 0.5rem 0;
+}
+
+.info-pregunta {
   font-family: var(--font-titulo);
-  font-size: 1rem;
+  font-size: 1.3rem;
   color: var(--marron);
-  opacity: 0.7;
+  text-align: center;
+  letter-spacing: 1px;
 }
- 
-.burbuja-der .burbuja-anio {
-  color: var(--madera);
+
+.btn-ubicacion {
+  width: 100%;
+  text-align: center;
 }
- 
-/*
-  La burbuja del RSVP es más grande porque contiene
-  la caricatura del bebé y el botón.
-*/
-.burbuja-rsvp {
-  align-items: center;
-  padding: 1.5rem 1.2rem;
-  gap: 1rem;
+
+.btn-rsvp {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 0.9rem 2rem;
 }
  
  
@@ -719,10 +583,11 @@ button {
    Entra desde abajo cuando el usuario llega a esta sección.
 ─────────────────────────────────────────────────────────────── */
 .seccion-final {
-  background: var(--bosque);
-  padding: 3rem 1rem 0;
+  /* padding: 3rem 1rem 0; */
   text-align: center;
   overflow: hidden;
+  width: 100vw;
+  
 }
  
 /*
@@ -733,18 +598,22 @@ button {
   opacity: 0;
   transform: translateY(60px);
   transition: opacity 0.8s ease, transform 0.8s ease;
-  max-width: 600px;
   margin: 0 auto;
+  width: 100%;
 }
  
 .animacion-final.visible {
   opacity: 1;
   transform: translateY(0);
+    
+
+
 }
  
-.animacion-final img {
+.animacion-final video {
   width: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center center;
 }
  
  
