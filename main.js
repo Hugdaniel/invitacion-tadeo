@@ -368,7 +368,7 @@ document.addEventListener('keydown', e => {
     4. Copiá esos valores abajo.
     5. Tomá la URL del form y cambiá /viewform por /formResponse.
 */
-const FORM_URL = 'https://docs.google.com/forms/d/16XA8HjuMu3JoyfY2xmMIaxmC4wpeW66_CtOG_9LgU3Q/formResponse'
+const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfZdk6punWZm0ZaVSfLw8nJMlnHb8PkXK-nuEs7YIjjZlqxSg/formResponse'
 
 const ENTRIES = {
   nombre:   'entry.187003640',
