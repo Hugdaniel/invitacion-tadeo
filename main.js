@@ -368,12 +368,12 @@ document.addEventListener('keydown', e => {
     4. Copiá esos valores abajo.
     5. Tomá la URL del form y cambiá /viewform por /formResponse.
 */
-const FORM_URL = 'https://docs.google.com/forms/d/e/TU_FORM_ID_ACA/formResponse'
+const FORM_URL = 'https://forms.gle/uV4MpBauwjYfoCLPA'
 
 const ENTRIES = {
-  nombre:   'entry.XXXXXXXXX',
-  personas: 'entry.XXXXXXXXX',
-  mensaje:  'entry.XXXXXXXXX'
+  nombre:   'entry.187003640',
+  personas: 'entry.1210780225',
+  mensaje:  'entry.448228849'
 }
 
 formRSVP.addEventListener('submit', async e => {
@@ -456,7 +456,7 @@ function fadeVolumen(elemento, desde, hasta, duracion) {
     volumenActual += incremento
 
     // Clamp: asegura que el volumen no se salga de 0-1
-    volumenActual = Math.min(Math.max(volumenActual, 0), 1)
+    volumenActual = Math.min(Math.max(volumenActual, 0), 2)
     elemento.volume = volumenActual
 
     // Cuando llegamos al volumen final, paramos
