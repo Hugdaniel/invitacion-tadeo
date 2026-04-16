@@ -368,7 +368,7 @@ document.addEventListener('keydown', e => {
     4. Copiá esos valores abajo.
     5. Tomá la URL del form y cambiá /viewform por /formResponse.
 */
-const FORM_URL = 'https://forms.gle/uV4MpBauwjYfoCLPA'
+const FORM_URL = 'https://docs.google.com/forms/d/16XA8HjuMu3JoyfY2xmMIaxmC4wpeW66_CtOG_9LgU3Q/formResponse'
 
 const ENTRIES = {
   nombre:   'entry.187003640',
@@ -387,6 +387,8 @@ formRSVP.addEventListener('submit', async e => {
   datos.append(ENTRIES.nombre,   document.getElementById('nombre').value)
   datos.append(ENTRIES.personas, document.getElementById('personas').value)
   datos.append(ENTRIES.mensaje,  document.getElementById('mensaje').value)
+
+  datos.append('submit', 'submit')
 
   try {
     await fetch(FORM_URL, {
@@ -434,7 +436,7 @@ function mostrarExitoRSVP() {
 */
 function abrirMaps() {
   const direccion = encodeURIComponent('Av. Ejemplo 1234, Marcos Paz, Buenos Aires')
-  window.open(`https://maps.google.com/?q=${direccion}`, '_blank')
+  window.open(`https://maps.app.goo.gl/hcFBXJo4r4FCVWr1A`, '_blank')
 }
 
 /*
